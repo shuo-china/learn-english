@@ -1,5 +1,10 @@
 [
   {
+    "id": "blossom's_grove",
+    "title": "花林物语",
+    "file": "blossom's_grove.txt"
+  },
+  {
     "id": "journey_to_the_west_1_30",
     "title": "西游记(1-30)",
     "file": "journey_to_the_west_1_30.txt"

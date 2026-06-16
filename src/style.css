@@ -290,7 +290,7 @@ button {
   align-items: center;
   padding-left: 92px;
   color: #142a1e;
-  font-family: 'Comic Sans MS', 'Trebuchet MS', 'Arial Rounded MT Bold', 'Microsoft YaHei', sans-serif;
+  font-family: 'Nunito', 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: clamp(1.52rem, 1.58vw, 1.92rem);
   font-weight: 700;
   letter-spacing: 0;

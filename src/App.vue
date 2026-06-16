@@ -165,11 +165,11 @@ function handleWordClick(wordId) {
   const word = words.value.find((item) => item.id === wordId)
 
   if (word) {
-    if (!word.revealed) {
-      word.revealed = true
-    }
+    word.revealed = !word.revealed
 
-    playPronunciation(word.word)
+    if (word.revealed) {
+      playPronunciation(word.word)
+    }
   }
 }
 
