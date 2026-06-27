@@ -1,16 +1,18 @@
 <script setup>
 import { BookOpen, ChevronDown } from '@lucide/vue'
 import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+import { playPronunciation } from './lib/pronunciation'
+import { createShuffledWordIds, loadBooksIndex, loadVocabularyWords } from './lib/vocabulary'
 
 const books = ref([])
 const selectedBookId = ref('')
 const words = ref([])
-const orderMode = ref('sequence')
+const orderMode = ref('shuffle')
 const shuffledIds = ref([])
 const isBookMenuOpen = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref('')
-let activeAudio = null
 
 const selectedBook = computed(() =>
   books.value.find((book) => book.id === selectedBookId.value),
@@ -25,65 +27,8 @@ const visibleWords = computed(() => {
   return shuffledIds.value.map((id) => byId.get(id)).filter(Boolean)
 })
 
-function parseMarkdownBook(markdown) {
-  return markdown
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'))
-    .map((line, index) => {
-      const normalizedLine = line.replace(/^[-*]\s+/, '')
-      const match =
-        normalizedLine.match(/^(.+?)\s*[:：]\s*(.+)$/) ||
-        normalizedLine.match(/^([A-Za-z][A-Za-z'’-]*(?:\s+[A-Za-z][A-Za-z'’-]*)*)\s+(.+)$/)
-
-      if (!match) {
-        return null
-      }
-
-      return {
-        id: `${index}-${match[1].trim().toLowerCase().replace(/\s+/g, '-')}`,
-        word: match[1].trim(),
-        meaning: match[2].trim(),
-        revealed: false,
-      }
-    })
-    .filter(Boolean)
-}
-
-function parseVocabularyText(text) {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'))
-    .map((line, index) => {
-      const isKey = line.startsWith('! ')
-      const normalizedLine = line.replace(/^!\s+/, '').replace(/^[-*]\s+/, '')
-      const match = normalizedLine.match(/^(\S+)\s+(.+)$/)
-
-      if (!match) {
-        return null
-      }
-
-      return {
-        id: `${index}-${match[1].trim().toLowerCase().replace(/\s+/g, '-')}`,
-        word: match[1].trim(),
-        meaning: match[2].trim(),
-        isKey,
-        revealed: false,
-      }
-    })
-    .filter(Boolean)
-}
-
 function shuffleWordIds(items) {
-  const ids = items.map((item) => item.id)
-
-  for (let index = ids.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[ids[index], ids[randomIndex]] = [ids[randomIndex], ids[index]]
-  }
-
-  shuffledIds.value = ids
+  shuffledIds.value = createShuffledWordIds(items)
 }
 
 async function loadBooks() {
@@ -91,13 +36,7 @@ async function loadBooks() {
   errorMessage.value = ''
 
   try {
-    const response = await fetch('/books/index.json')
-
-    if (!response.ok) {
-      throw new Error('无法读取单词本清单')
-    }
-
-    books.value = await response.json()
+    books.value = await loadBooksIndex()
     selectedBookId.value = books.value[0]?.id ?? ''
   } catch (error) {
     errorMessage.value = error.message || '单词本加载失败'
@@ -116,13 +55,7 @@ async function loadSelectedBook() {
   isBookMenuOpen.value = false
 
   try {
-    const response = await fetch(`/books/${selectedBook.value.file}`)
-
-    if (!response.ok) {
-      throw new Error(`无法读取 ${selectedBook.value.title}`)
-    }
-
-    words.value = parseVocabularyText(await response.text())
+    words.value = await loadVocabularyWords(selectedBook.value)
     shuffleWordIds(words.value)
   } catch (error) {
     words.value = []
@@ -134,6 +67,7 @@ async function loadSelectedBook() {
 
 function selectBook(bookId) {
   selectedBookId.value = bookId
+  isBookMenuOpen.value = false
 }
 
 function setOrderMode(mode) {
@@ -141,23 +75,6 @@ function setOrderMode(mode) {
 
   if (mode === 'shuffle') {
     shuffleWordIds(words.value)
-  }
-}
-
-function createYoudaoDictionaryUrl(text) {
-  return `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`
-}
-
-function playPronunciation(text) {
-  try {
-    if (activeAudio) {
-      activeAudio.pause()
-    }
-
-    activeAudio = new Audio(createYoudaoDictionaryUrl(text))
-    activeAudio.play().catch((error) => console.warn(error))
-  } catch (error) {
-    console.warn(error)
   }
 }
 
@@ -182,7 +99,10 @@ onMounted(loadBooks)
   <main class="app-shell">
     <header class="topbar">
       <div class="topbar-inner">
-        <h1 class="app-title">单词背诵</h1>
+        <nav class="mode-toggle" aria-label="练习模式">
+          <RouterLink class="mode-link" to="/">背诵</RouterLink>
+          <RouterLink class="mode-link" to="/spell">拼写</RouterLink>
+        </nav>
 
         <div class="book-picker">
           <button class="book-trigger" type="button" @click="isBookMenuOpen = !isBookMenuOpen">
@@ -203,6 +123,37 @@ onMounted(loadBooks)
               {{ book.title }}
             </button>
           </div>
+
+          <Teleport to="body">
+            <div
+              v-if="isBookMenuOpen"
+              class="book-dialog-backdrop"
+              role="presentation"
+              @click.self="isBookMenuOpen = false"
+            >
+              <section class="book-dialog" role="dialog" aria-modal="true" aria-labelledby="book-dialog-title">
+                <div class="book-dialog-head">
+                  <h2 id="book-dialog-title">选择单词本</h2>
+                  <button class="book-dialog-close" type="button" aria-label="关闭" @click="isBookMenuOpen = false">
+                    ×
+                  </button>
+                </div>
+
+                <div class="book-dialog-list">
+                  <button
+                    v-for="book in books"
+                    :key="book.id"
+                    class="book-dialog-option"
+                    :class="{ active: book.id === selectedBookId }"
+                    type="button"
+                    @click="selectBook(book.id)"
+                  >
+                    {{ book.title }}
+                  </button>
+                </div>
+              </section>
+            </div>
+          </Teleport>
         </div>
 
         <div class="order-toggle" aria-label="排序方式">
@@ -228,28 +179,16 @@ onMounted(loadBooks)
 
     <section class="stage-scroll">
       <div class="stage-inner">
-        <div class="word-paper">
-          <div v-if="isLoading" class="empty-state">正在翻开单词本...</div>
-          <div v-else-if="errorMessage" class="empty-state">{{ errorMessage }}</div>
-          <div v-else-if="!visibleWords.length" class="empty-state">这个单词本还没有可背诵的内容</div>
-
-          <div v-else class="word-list">
-            <button
-              v-for="word in visibleWords"
-              :key="word.id"
-              class="word-row"
-              :class="{ revealed: word.revealed, key: word.isKey }"
-              type="button"
-              @click="handleWordClick(word.id)"
-            >
-              <span class="word-text">{{ word.word }}</span>
-              <span class="meaning-cell">
-                <span v-if="word.revealed" class="meaning-text">{{ word.meaning }}</span>
-                <span v-else class="meaning-mask" aria-hidden="true"></span>
-              </span>
-            </button>
-          </div>
-        </div>
+        <RouterView v-slot="{ Component }">
+          <component
+            :is="Component"
+            :error-message="errorMessage"
+            :is-loading="isLoading"
+            :visible-words="visibleWords"
+            :words="words"
+            @word-click="handleWordClick"
+          />
+        </RouterView>
       </div>
     </section>
   </main>

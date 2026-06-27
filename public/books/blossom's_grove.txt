@@ -1,57 +1,184 @@
-rug 地毯
-pearl 珍珠
-shell 外壳
-cone 圆锥体
-cane 拐杖；藤条
-chili 辣椒
-grind 研磨
-garlic 大蒜
-cucumber 黄瓜
-fond 喜欢；疼爱
-efficient 高效的
-beetle 甲虫
-salmon 三文鱼
-haul 拖运；捕获物
-fence 围栏
-latte 拿铁
-proper 适当的
-swab 棉签
-perspective 观点，看法
-diversity 多样性
-appreciate 欣赏
-coincidence 巧合
-garbage 垃圾
-trash 垃圾
-flavor 风味
-squid 鱿鱼
-ward 病房
-wardrobe 衣柜
-decorative 装饰性的
-ham 火腿
-souvenir 纪念品
-rod 杆子
-angler 钓鱼者
-technique 技术
-reel 卷轴
-pier 码头
-resident 居民
-stall 摊位
-ladybug 瓢虫；花大姐
-charcoal 木炭
-settle 稳定的
-corn 玉米
-decorate 装饰性的
-corner 角落
-lettuce 生菜
-pit 坑
-inventory 库存
-furniture 家具
-wither 枯萎
-sickle 镰刀
-hammer 锤子
-shovel 铲子
-handy 方便的
-soil 土壤，土地
-loose 松动的；宽松的
-despite 尽管
-crew 全体成员
+i am dog | 我是狗
+mission | 使命，任务
+summit | 山顶
+exactly | 确切地
+figure | 数字；图形；计算
+spark | 火花
+sparkly | 闪闪发光的
+serious | 认真的；严肃的
+bake | 烘焙
+bakery | 面包店
+! wheat | 小麦
+berry | 浆果
+oven | 烤箱
+! peel | 削皮
+tone | 音调
+spoon | 勺子
+break | 打破
+tent | 帐篷
+! brain | 大脑
+fog | 雾
+worst | 最差的(bad的最高级)
+enemy | 敌人
+courage | 勇气
+discourage | 灰心的
+omelet | 鸡蛋饼
+! coop | 禽舍
+occupy | 占据
+! hen | 母鸡
+pastry | 糕点
+counter | 柜台；计数器
+mochi | 麻薯
+crisp | 脆的
+kernel | 内核（系统）；果仁
+ruby | 红宝石
+specialty | 专业，专长
+butter | 黄油
+espresso | 浓缩咖啡
+experiment | 实验
+craft | 工艺
+camp | 营地
+campfire | 篝火
+bench | 长凳
+workbench | 工作台
+sow | 播种
+plot | 地块；情节
+grove | 小树林
+plump | 丰满的
+owe | 欠
+squeeze | 挤压
+divine | 神圣的；极好的
+! sneeze | 打喷嚏
+merchant | 商人
+spot | 地点；斑点；发现
+shelf | 货架
+bare | 空的
+scatter | 分散
+! expedition | 远征；探险
+! herbal | 草药的
+pot | 锅
+! harsh | 严厉的
+snap | 折断
+crop | 庄稼
+swing | 摇摆
+resume | 继续；简历
+brew | 酿造
+distinction | 区别
+rare | 稀有
+escape | 逃脱
+afford | 买得起
+eel | 鳗鱼
+cotton | 棉花
+wing | 翅膀
+sardine | 沙丁鱼
+mood | 心情
+bass | 鲈鱼
+specific |  明确的；特定的
+sprint | 冲刺
+shed 棚屋；小屋
+convince | 使信服
+tempt | 诱惑
+burn gel | 燃烧凝胶
+truck | 货车
+shore | 岸边
+boil | 煮沸
+wool | 羊毛
+scarf | 围巾
+talent | 天赋
+silver | 银
+blend | 混合
+insect | 昆虫
+liquid | 液体
+toss | 扔
+crab | 螃蟹
+nip | 捏；咬
+delicate | 易碎的；精致的
+supply | 供应；补给
+ingredient | 成分
+fascinate | 迷住；吸引
+dawn | 黎明
+whack | 重击
+livestock | 畜牲
+tug | 拖
+detect | 检测；发现
+clam | 蛤蜊
+melt | 融化
+yogurt | 酸奶
+popcorn | 爆米花
+discount | 打折的
+rug | 地毯
+pearl | 珍珠
+shell | 外壳
+cone | 圆锥体
+cane | 拐杖；藤条
+chili | 辣椒
+grind | 研磨
+garlic | 大蒜
+cucumber | 黄瓜
+fond | 喜欢；疼爱
+efficient | 高效的
+beetle | 甲虫
+salmon | 三文鱼
+haul | 拖运；捕获物
+fence | 围栏
+latte | 拿铁
+proper | 适当的
+swab | 棉签
+perspective | 观点，看法
+diversity | 多样性
+appreciate | 欣赏
+coincidence | 巧合
+garbage | 垃圾
+trash | 垃圾
+flavor | 风味
+ward | 病房
+wardrobe | 衣柜
+decorative | 装饰性的
+ham | 火腿
+souvenir | 纪念品
+rod | 杆子
+angler | 钓鱼者
+technique | 技术
+reel | 卷轴
+pier | 码头
+resident | 居民
+stall | 摊位
+ladybug | 瓢虫；花大姐
+charcoal | 木炭
+settle | 稳定的
+corn | 玉米
+decorate | 装饰性的
+corner | 角落
+lettuce | 生菜
+pit | 坑
+inventory | 库存
+furniture | 家具
+wither | 枯萎
+sickle | 镰刀
+hammer | 锤子
+shovel | 铲子
+handy | 方便的
+soil | 土壤，土地
+loose | 松动的；宽松的
+despite | 尽管
+crew | 全体成员
+sturdy | 坚固的；结实的
+lift | 举起
+deserve | 值得
+hug | 拥抱
+vend | 贩卖；销售
+beverage | 饮料
+flour | 面粉
+almond | 杏仁
+carbon | 碳
+occasionally | 偶尔
+miscellaneous | 杂项
+pile | 堆积
+scallion | 葱
+ginger | 姜
+grill | 烧烤；烤架
+scout | 侦察；寻找
+squid | 鱿鱼
+crave | 渴望
+curious | 好奇的
+ankle | 脚踝
