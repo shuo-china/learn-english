@@ -1,4 +1,3 @@
-i am dog | 我是狗
 mission | 使命，任务
 summit | 山顶
 exactly | 确切地
