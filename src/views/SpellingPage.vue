@@ -24,14 +24,17 @@ const props = defineProps({
 })
 
 const spellingStage = ref(null)
+const spellingInput = ref(null)
 const questionIndex = ref(0)
 const inputs = ref([])
+const mobileInputValue = ref('')
 const lockedSegments = ref([])
 const segmentStatuses = ref([])
 const activeSegmentIndex = ref(0)
 const shouldFocusFirstError = ref(false)
 const isAnswerShown = ref(false)
 const wrongSubmitCount = ref(0)
+const lastWrongSubmissionKey = ref('')
 
 const currentWord = computed(() => props.visibleWords[questionIndex.value] ?? null)
 const answerSegments = computed(() => currentWord.value?.word.trim().split(/\s+/).filter(Boolean) ?? [])
@@ -46,6 +49,11 @@ const isComplete = computed(
 
 function focusStage() {
   nextTick(() => {
+    if (spellingInput.value) {
+      spellingInput.value.focus()
+      return
+    }
+
     spellingStage.value?.focus()
   })
 }
@@ -70,12 +78,14 @@ function firstEditableIndex(startIndex = 0, direction = 1) {
 
 function resetQuestion() {
   inputs.value = answerSegments.value.map(() => '')
+  mobileInputValue.value = ''
   lockedSegments.value = answerSegments.value.map(() => false)
   segmentStatuses.value = answerSegments.value.map(() => 'idle')
   activeSegmentIndex.value = firstEditableIndex(0)
   shouldFocusFirstError.value = false
   isAnswerShown.value = false
   wrongSubmitCount.value = 0
+  lastWrongSubmissionKey.value = ''
   focusStage()
 }
 
@@ -91,6 +101,10 @@ function firstErrorIndex() {
   return segmentStatuses.value.findIndex((status, index) => status === 'error' && !lockedSegments.value[index])
 }
 
+function markAnswerChanged() {
+  lastWrongSubmissionKey.value = ''
+}
+
 function activateSegment(index) {
   activeSegmentIndex.value = index
   shouldFocusFirstError.value = false
@@ -98,6 +112,7 @@ function activateSegment(index) {
   if (segmentStatuses.value[index] === 'error') {
     inputs.value[index] = ''
     segmentStatuses.value[index] = 'retrying'
+    markAnswerChanged()
   }
 }
 
@@ -222,12 +237,14 @@ function appendCharacter(character) {
   if (segmentStatuses.value[index] === 'error') {
     inputs.value[index] = character
     segmentStatuses.value[index] = 'retrying'
+    markAnswerChanged()
     updateRetryStatus(index)
     playTypingSound()
     return
   }
 
   inputs.value[index] = `${inputs.value[index] ?? ''}${character}`
+  markAnswerChanged()
   updateRetryStatus(index)
   playTypingSound()
 }
@@ -253,6 +270,7 @@ function deleteCharacter() {
 
   if (inputs.value[index]) {
     inputs.value[index] = inputs.value[index].slice(0, -1)
+    markAnswerChanged()
     clearSegmentError(index)
     updateRetryStatus(index)
     playTypingSound()
@@ -265,6 +283,7 @@ function deleteCharacter() {
 
   if (!lockedSegments.value[previousIndex] && inputs.value[previousIndex]) {
     inputs.value[previousIndex] = inputs.value[previousIndex].slice(0, -1)
+    markAnswerChanged()
     clearSegmentError(previousIndex)
     updateRetryStatus(previousIndex)
     playTypingSound()
@@ -294,6 +313,7 @@ function playCurrentPronunciation() {
 function showAnswer() {
   isAnswerShown.value = !isAnswerShown.value
   wrongSubmitCount.value = 0
+  markAnswerChanged()
   focusStage()
 }
 
@@ -307,6 +327,14 @@ function hideAnswer(event) {
 }
 
 function submitAnswer() {
+  const submissionKey = answerSegments.value
+    .map((_, index) => (lockedSegments.value[index] ? '<locked>' : inputs.value[index] ?? ''))
+    .join('\u0000')
+
+  if (submissionKey === lastWrongSubmissionKey.value) {
+    return
+  }
+
   answerSegments.value.forEach((segment, index) => {
     if (lockedSegments.value[index]) {
       return
@@ -325,11 +353,13 @@ function submitAnswer() {
     shouldFocusFirstError.value = false
     isAnswerShown.value = false
     wrongSubmitCount.value = 0
+    lastWrongSubmissionKey.value = ''
     playRightSound()
     playCurrentPronunciation()
     return
   }
 
+  lastWrongSubmissionKey.value = submissionKey
   wrongSubmitCount.value += 1
   if (wrongSubmitCount.value >= 3) {
     isAnswerShown.value = true
@@ -404,6 +434,56 @@ function handleKeydown(event) {
   }
 }
 
+function handleSpellingInput(event) {
+  const value = event.target.value
+
+  if (!currentWord.value || !value) {
+    mobileInputValue.value = ''
+    event.target.value = ''
+    return
+  }
+
+  Array.from(value).forEach((character) => {
+    if (character === ' ') {
+      handleSpace()
+      return
+    }
+
+    appendCharacter(character)
+  })
+
+  mobileInputValue.value = ''
+  event.target.value = ''
+}
+
+function handleSpellingInputKeydown(event) {
+  if (!currentWord.value) {
+    return
+  }
+
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    handleKeydown(event)
+    return
+  }
+
+  if (event.key === 'Backspace') {
+    event.preventDefault()
+    deleteCharacter()
+    return
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault()
+
+    if (isComplete.value) {
+      goToNextQuestion()
+      return
+    }
+
+    submitAnswer()
+  }
+}
+
 watch(
   () => props.visibleWords,
   () => {
@@ -429,6 +509,21 @@ onMounted(() => {
     @click="hideAnswer"
     @keydown="handleKeydown"
   >
+    <input
+      ref="spellingInput"
+      :value="mobileInputValue"
+      class="spelling-input"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+      enterkeyhint="done"
+      aria-label="拼写输入"
+      @input="handleSpellingInput"
+      @keydown.stop="handleSpellingInputKeydown"
+    />
+
     <div v-if="isLoading" class="empty-state">正在翻开单词本...</div>
     <div v-else-if="errorMessage" class="empty-state">{{ errorMessage }}</div>
     <div v-else-if="!visibleWords.length" class="empty-state">这个单词本还没有可拼写的内容</div>
