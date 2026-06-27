@@ -17,6 +17,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  words: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const spellingStage = ref(null)
@@ -229,6 +233,16 @@ function appendCharacter(character) {
 }
 
 function deleteCharacter() {
+  if (shouldFocusFirstError.value) {
+    const errorIndex = firstErrorIndex()
+
+    if (errorIndex !== -1) {
+      activateSegment(errorIndex)
+      playTypingSound()
+      return
+    }
+  }
+
   const index = activeSegmentIndex.value
   shouldFocusFirstError.value = false
 

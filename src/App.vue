@@ -1,7 +1,7 @@
 <script setup>
 import { BookOpen, ChevronDown } from '@lucide/vue'
 import { computed, onMounted, ref, watch } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { playPronunciation } from './lib/pronunciation'
 import { createShuffledWordIds, loadBooksIndex, loadVocabularyWords } from './lib/vocabulary'
 
@@ -13,10 +13,13 @@ const shuffledIds = ref([])
 const isBookMenuOpen = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref('')
+const route = useRoute()
 
 const selectedBook = computed(() =>
   books.value.find((book) => book.id === selectedBookId.value),
 )
+
+const isSpellingMode = computed(() => route.name === 'spell')
 
 const visibleWords = computed(() => {
   if (orderMode.value !== 'shuffle') {
@@ -96,7 +99,7 @@ onMounted(loadBooks)
 </script>
 
 <template>
-  <main class="app-shell">
+  <main class="app-shell" :class="{ 'spelling-shell': isSpellingMode }">
     <header class="topbar">
       <div class="topbar-inner">
         <nav class="mode-toggle" aria-label="练习模式">
