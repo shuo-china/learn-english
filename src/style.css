@@ -90,15 +90,15 @@ button {
   padding: 4px;
   overflow: visible;
   background:
-    radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, 0.82), transparent 38%),
-    linear-gradient(180deg, rgba(255, 249, 221, 0.96), rgba(235, 226, 178, 0.92));
-  border: 2px solid rgba(82, 101, 57, 0.46);
-  border-radius: 18px 15px 19px 14px;
+    radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, 0.78), transparent 38%),
+    linear-gradient(180deg, rgba(255, 249, 221, 0.95), rgba(235, 226, 178, 0.91));
+  border: 2px solid rgba(82, 101, 57, 0.44);
+  border-radius: 17px 14px 18px 13px;
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.6),
     inset 0 -5px 12px rgba(158, 135, 75, 0.1),
-    0 8px 18px rgba(49, 67, 43, 0.12);
-  transform: rotate(-0.8deg);
+    0 8px 18px rgba(49, 67, 43, 0.11);
+  transform: rotate(0.65deg);
 }
 
 .mode-toggle::before,
@@ -121,10 +121,7 @@ button {
 }
 
 .mode-toggle::after {
-  inset: 4px;
-  border: 1px solid rgba(126, 96, 48, 0.18);
-  border-radius: 14px 12px 16px 11px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  display: none;
 }
 
 .mode-link {
@@ -133,12 +130,12 @@ button {
   display: grid;
   place-items: center;
   min-width: 0;
-  color: #36512e;
-  font-size: 1.15rem;
+  color: #314a2b;
+  font-size: 1.28rem;
   font-weight: 700;
   line-height: 1;
   text-decoration: none;
-  text-shadow: 0 1px 0 rgba(255, 255, 238, 0.55);
+  text-shadow: 0 1px 0 rgba(255, 255, 238, 0.54);
   border-radius: 14px 11px 15px 12px;
   transition:
     color 160ms ease,
@@ -148,7 +145,7 @@ button {
 }
 
 .mode-link + .mode-link {
-  border-left: 1.5px dashed rgba(105, 124, 72, 0.32);
+  border-left: 0;
 }
 
 .mode-link:hover {
@@ -159,14 +156,12 @@ button {
 .mode-link.router-link-active {
   color: #fff9df;
   background:
-    radial-gradient(ellipse at 25% 18%, rgba(255, 255, 255, 0.26), transparent 44%),
+    radial-gradient(ellipse at 25% 18%, rgba(255, 255, 255, 0.24), transparent 44%),
     linear-gradient(180deg, rgba(71, 122, 96, 0.96), rgba(45, 91, 75, 0.98));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -5px 10px rgba(22, 61, 49, 0.17),
-    0 3px 0 rgba(49, 75, 52, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   text-shadow: 0 1px 1px rgba(13, 50, 39, 0.28);
-  transform: translateY(-1px) rotate(0.5deg);
+  transform: translateY(-1px) rotate(-0.4deg);
 }
 
 .book-trigger {
@@ -175,27 +170,45 @@ button {
   align-items: center;
   min-width: 205px;
   height: 46px;
-  padding: 0 16px;
-  color: #29442d;
+  padding: 0 17px;
+  color: #314a2b;
   font-size: 1.32rem;
   font-weight: 600;
-  background: rgba(255, 253, 241, 0.86);
-  border: 1.5px solid rgba(91, 122, 71, 0.42);
-  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 20% 12%, rgba(255, 255, 255, 0.78), transparent 40%),
+    linear-gradient(180deg, rgba(255, 250, 225, 0.96), rgba(236, 227, 181, 0.92));
+  border: 2px solid rgba(82, 101, 57, 0.42);
+  border-radius: 17px 14px 18px 13px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 5px 14px rgba(54, 70, 45, 0.06);
+    inset 0 2px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -5px 12px rgba(158, 135, 75, 0.09),
+    0 7px 16px rgba(49, 67, 43, 0.1);
+  text-shadow: 0 1px 0 rgba(255, 255, 238, 0.54);
+  transform: rotate(0.35deg);
+  transition:
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.book-trigger:hover {
+  color: #20462f;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -5px 12px rgba(158, 135, 75, 0.11),
+    0 9px 18px rgba(49, 67, 43, 0.13);
+  transform: rotate(0.35deg);
 }
 
 .book-icon {
   flex: 0 0 auto;
-  color: #4e744c;
+  color: #477460;
 }
 
 .chevron-icon {
   flex: 0 0 auto;
   margin-left: auto;
-  color: #29442d;
+  color: #314a2b;
 }
 
 .book-menu {
@@ -242,30 +255,58 @@ button {
   position: absolute;
   right: 42px;
   justify-self: auto;
-  width: 245px;
+  width: 178px;
   height: 46px;
-  overflow: hidden;
-  background: rgba(255, 253, 241, 0.78);
-  border: 1.5px solid rgba(91, 122, 71, 0.46);
-  border-radius: 8px;
+  padding: 4px;
+  overflow: visible;
+  background:
+    radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, 0.78), transparent 38%),
+    linear-gradient(180deg, rgba(255, 249, 221, 0.95), rgba(235, 226, 178, 0.91));
+  border: 2px solid rgba(82, 101, 57, 0.44);
+  border-radius: 17px 14px 18px 13px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -5px 12px rgba(158, 135, 75, 0.1),
+    0 8px 18px rgba(49, 67, 43, 0.11);
+  transform: rotate(0.65deg);
 }
 
 .order-button {
-  color: #203725;
+  min-width: 0;
+  color: #314a2b;
   font-size: 1.28rem;
   font-weight: 700;
+  line-height: 1;
   background: transparent;
   border: 0;
+  border-radius: 14px 11px 15px 12px;
+  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 255, 238, 0.54);
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .order-button + .order-button {
-  border-left: 1.5px solid rgba(91, 122, 71, 0.34);
+  border-left: 0;
+}
+
+.order-button:hover {
+  color: #20462f;
+  background: rgba(119, 151, 88, 0.11);
 }
 
 .order-button.active {
-  color: #fffaf0;
-  background: linear-gradient(180deg, rgba(82, 126, 84, 0.96), rgba(55, 99, 60, 0.96));
-  box-shadow: inset 0 0 18px rgba(34, 69, 38, 0.16);
+  color: #fff9df;
+  background:
+    radial-gradient(ellipse at 25% 18%, rgba(255, 255, 255, 0.24), transparent 44%),
+    linear-gradient(180deg, rgba(71, 122, 96, 0.96), rgba(45, 91, 75, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 1px 1px rgba(13, 50, 39, 0.28);
+  transform: translateY(-1px) rotate(-0.4deg);
 }
 
 .stage-scroll {
@@ -441,6 +482,19 @@ button {
   box-shadow: 0 26px 54px rgba(49, 61, 40, 0.13);
 }
 
+.spelling-progress {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  color: #5f6b7c;
+  font-family: 'Nunito', 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  user-select: none;
+}
+
 .spelling-prompt {
   max-width: min(760px, 100%);
   margin: 0 0 42px;
@@ -450,6 +504,34 @@ button {
   font-weight: 500;
   line-height: 1.25;
   text-align: center;
+}
+
+.spelling-success {
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  max-width: min(760px, 100%);
+  text-align: center;
+}
+
+.spelling-success-word {
+  color: #07182d;
+  font-family: 'Nunito', 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(3rem, 6.4vw, 4.7rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.spelling-success-meaning {
+  color: #687386;
+  font-family: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-size: clamp(1.34rem, 2.4vw, 1.82rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .answer-popover {
@@ -490,8 +572,8 @@ button {
 
 .spell-segment {
   display: grid;
+  flex: 0 0 auto;
   align-items: end;
-  min-width: clamp(48px, 9vw, 92px);
   min-height: 66px;
   padding: 0 8px 7px;
   color: #6f7686;
@@ -536,7 +618,8 @@ button {
 .spell-text {
   display: block;
   min-width: 1ch;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .spelling-controls {
@@ -657,48 +740,59 @@ button {
   .mode-toggle {
     position: relative;
     left: auto;
-    width: 124px;
-    height: 40px;
+    width: 138px;
+    height: 38px;
     padding: 3px;
     border-color: rgba(91, 122, 71, 0.36);
     border-radius: 16px 13px 17px 12px;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.55),
       0 5px 12px rgba(49, 67, 43, 0.1);
-    transform: rotate(-0.5deg);
+    transform: rotate(0.4deg);
   }
 
   .mode-link {
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 600;
     border-radius: 12px 10px 13px 10px;
   }
 
   .mode-link.router-link-active {
+    color: #fffaf0;
     background:
       radial-gradient(ellipse at 25% 18%, rgba(255, 255, 255, 0.24), transparent 44%),
       linear-gradient(180deg, rgba(71, 122, 96, 0.96), rgba(45, 91, 75, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
   .order-toggle {
     position: relative;
     right: auto;
-    width: 132px;
+    width: 138px;
     height: 38px;
-    background: rgba(255, 253, 241, 0.48);
-    border-color: rgba(91, 122, 71, 0.28);
-    border-radius: 999px;
+    padding: 3px;
+    border-color: rgba(91, 122, 71, 0.36);
+    border-radius: 16px 13px 17px 12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      0 5px 12px rgba(49, 67, 43, 0.1);
+    transform: rotate(0.4deg);
   }
 
   .order-button {
     font-size: 1rem;
     font-weight: 600;
+    border-radius: 12px 10px 13px 10px;
   }
 
   .order-button.active {
     color: #fffaf0;
-    background: rgba(63, 105, 67, 0.9);
-    box-shadow: none;
+    background:
+      radial-gradient(ellipse at 25% 18%, rgba(255, 255, 255, 0.24), transparent 44%),
+      linear-gradient(180deg, rgba(71, 122, 96, 0.96), rgba(45, 91, 75, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
   .stage-scroll {
@@ -757,8 +851,26 @@ button {
     padding: 42px 12px 100px;
   }
 
+  .spelling-progress {
+    top: 16px;
+    right: 16px;
+    font-size: 0.88rem;
+  }
+
   .spelling-prompt {
     margin-bottom: 34px;
+  }
+
+  .spelling-success {
+    gap: 22px;
+  }
+
+  .spelling-success-word {
+    font-size: clamp(2.5rem, 14vw, 3.7rem);
+  }
+
+  .spelling-success-meaning {
+    font-size: clamp(1.22rem, 5.4vw, 1.58rem);
   }
 
   .answer-popover {
@@ -772,7 +884,6 @@ button {
   }
 
   .spell-segment {
-    min-width: clamp(45px, 16vw, 78px);
     min-height: 58px;
     padding-right: 6px;
     padding-left: 6px;
@@ -808,6 +919,11 @@ button {
     padding: 0 12px;
     font-size: 1.08rem;
     justify-content: center;
+    border-radius: 15px 12px 16px 11px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.58),
+      0 5px 12px rgba(49, 67, 43, 0.1);
+    transform: rotate(0.2deg);
   }
 
   .book-trigger span,
@@ -909,7 +1025,7 @@ button {
   }
 
   .mode-toggle {
-    width: 110px;
+    width: 116px;
     height: 40px;
   }
 
@@ -930,7 +1046,6 @@ button {
   }
 
   .spell-segment {
-    min-width: clamp(42px, 20vw, 68px);
     font-size: 2.1rem;
   }
 

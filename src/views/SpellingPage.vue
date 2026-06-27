@@ -31,6 +31,9 @@ const wrongSubmitCount = ref(0)
 
 const currentWord = computed(() => props.visibleWords[questionIndex.value] ?? null)
 const answerSegments = computed(() => currentWord.value?.word.trim().split(/\s+/).filter(Boolean) ?? [])
+const progressLabel = computed(
+  () => `${Math.min(questionIndex.value + 1, props.visibleWords.length)}/${props.visibleWords.length}`,
+)
 
 const completedCount = computed(() => props.visibleWords.slice(0, questionIndex.value).length)
 const isComplete = computed(
@@ -127,6 +130,44 @@ function updateRetryStatus(index) {
   segmentStatuses.value[index] = inputLength >= answerLength ? 'retry-complete' : 'retrying'
 }
 
+function getWordWidth(word) {
+  const letterWidths = {
+    w: 1.5,
+    m: 1.5,
+    s: 0.8,
+    t: 0.7,
+    r: 0.7,
+    f: 0.7,
+    j: 0.6,
+    i: 0.5,
+    l: 0.5,
+    u: 1.1,
+    o: 1.1,
+    p: 1.1,
+    q: 1.1,
+    n: 1.1,
+    h: 1.1,
+    g: 1.1,
+    d: 1.1,
+    b: 1.1,
+    z: 0.9,
+    y: 0.9,
+    x: 0.9,
+    v: 0.9,
+    c: 0.9,
+    "'": 0.5,
+  }
+
+  return word
+    .toLocaleLowerCase()
+    .split('')
+    .reduce((totalWidth, letter) => totalWidth + (letterWidths[letter] || 1), 1)
+}
+
+function inputWidth(segment, index) {
+  return Math.max(getWordWidth(segment), getWordWidth(inputs.value[index] ?? ''))
+}
+
 function normalizeAnswerText(text) {
   return text.trim().toLocaleLowerCase()
 }
@@ -140,6 +181,21 @@ function isLastEditableSegment(index = activeSegmentIndex.value) {
 }
 
 function handleSpace() {
+  if (isComplete.value) {
+    goToNextQuestion()
+    return
+  }
+
+  if (shouldFocusFirstError.value) {
+    const errorIndex = firstErrorIndex()
+
+    if (errorIndex !== -1) {
+      activateSegment(errorIndex)
+      playTypingSound()
+      return
+    }
+  }
+
   playTypingSound()
 
   if (isLastEditableSegment()) {
@@ -204,8 +260,6 @@ function deleteCharacter() {
 function goToNextQuestion() {
   if (questionIndex.value < props.visibleWords.length - 1) {
     questionIndex.value += 1
-  } else {
-    questionIndex.value = 0
   }
 }
 
@@ -255,9 +309,10 @@ function submitAnswer() {
 
   if (lockedSegments.value.every(Boolean)) {
     shouldFocusFirstError.value = false
+    isAnswerShown.value = false
     wrongSubmitCount.value = 0
     playRightSound()
-    goToNextQuestion()
+    playCurrentPronunciation()
     return
   }
 
@@ -271,7 +326,7 @@ function submitAnswer() {
 }
 
 function handleKeydown(event) {
-  if (!currentWord.value || isComplete.value) {
+  if (!currentWord.value) {
     return
   }
 
@@ -298,6 +353,14 @@ function handleKeydown(event) {
   if (event.ctrlKey && event.key === '.') {
     event.preventDefault()
     if (questionIndex.value < props.visibleWords.length - 1) {
+      goToNextQuestion()
+    }
+    return
+  }
+
+  if (isComplete.value) {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
       goToNextQuestion()
     }
     return
@@ -357,17 +420,24 @@ onMounted(() => {
     <div v-else-if="!visibleWords.length" class="empty-state">这个单词本还没有可拼写的内容</div>
 
     <div v-else class="spelling-card">
+      <div class="spelling-progress" aria-label="拼写进度">{{ progressLabel }}</div>
       <div v-if="isAnswerShown" class="answer-popover" role="dialog" aria-label="答案">
         <div class="answer-word">{{ currentWord.word }}</div>
       </div>
 
-      <p class="spelling-prompt">{{ currentWord.meaning }}</p>
+      <div v-if="isComplete" class="spelling-success" aria-live="polite">
+        <div class="spelling-success-word">{{ currentWord.word }}</div>
+        <div class="spelling-success-meaning">{{ currentWord.meaning }}</div>
+      </div>
 
-      <div class="spelling-segments" aria-live="polite">
+      <p v-else class="spelling-prompt">{{ currentWord.meaning }}</p>
+
+      <div v-if="!isComplete" class="spelling-segments" aria-live="polite">
         <span
           v-for="(segment, index) in answerSegments"
           :key="`${currentWord.id}-${index}`"
           class="spell-segment"
+          :style="{ minWidth: `${inputWidth(segment, index)}ch` }"
           :class="{
             active: index === activeSegmentIndex && !lockedSegments[index],
             error: segmentStatuses[index] === 'error',
