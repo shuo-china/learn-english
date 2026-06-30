@@ -91,7 +91,6 @@ button {
 .book-picker {
   position: absolute;
   left: calc(50% - 110px);
-  width: 220px;
   justify-self: auto;
 }
 
@@ -387,10 +386,16 @@ button {
   width: 100%;
   min-height: 62px;
   color: inherit;
+  cursor: pointer;
   text-align: left;
   background: transparent;
   border: 0;
   border-bottom: 1.5px solid rgba(98, 123, 75, 0.32);
+}
+
+.word-row:focus-visible {
+  outline: 3px solid rgba(68, 119, 58, 0.45);
+  outline-offset: -3px;
 }
 
 .word-row.key {
@@ -411,6 +416,8 @@ button {
   font-size: clamp(1.52rem, 1.58vw, 1.92rem);
   font-weight: 700;
   letter-spacing: 0;
+  cursor: text;
+  user-select: text;
 }
 
 .meaning-cell {

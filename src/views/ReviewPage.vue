@@ -19,6 +19,16 @@ defineProps({
 })
 
 const emit = defineEmits(['word-click'])
+
+function handleWordClick(wordId) {
+  const selectionText = window.getSelection?.().toString()
+
+  if (selectionText) {
+    return
+  }
+
+  emit('word-click', wordId)
+}
 </script>
 
 <template>
@@ -28,20 +38,23 @@ const emit = defineEmits(['word-click'])
     <div v-else-if="!visibleWords.length" class="empty-state">这个单词本还没有可背诵的内容</div>
 
     <div v-else class="word-list">
-      <button
+      <div
         v-for="word in visibleWords"
         :key="word.id"
         class="word-row"
         :class="{ revealed: word.revealed, key: word.isKey }"
-        type="button"
-        @click="emit('word-click', word.id)"
+        role="button"
+        tabindex="0"
+        @click="handleWordClick(word.id)"
+        @keydown.enter.prevent="emit('word-click', word.id)"
+        @keydown.space.prevent="emit('word-click', word.id)"
       >
         <span class="word-text">{{ word.word }}</span>
         <span class="meaning-cell">
           <span v-if="word.revealed" class="meaning-text">{{ word.meaning }}</span>
           <span v-else class="meaning-mask" aria-hidden="true"></span>
         </span>
-      </button>
+      </div>
       <div class="word-list-meta" aria-live="polite">共 {{ words.length }} 个单词</div>
     </div>
   </div>

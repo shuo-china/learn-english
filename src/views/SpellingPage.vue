@@ -27,7 +27,8 @@ const spellingStage = ref(null)
 const spellingInput = ref(null)
 const questionIndex = ref(0)
 const inputs = ref([])
-const mobileInputValue = ref('')
+const mobileInputSentinel = ' '
+const mobileInputValue = ref(mobileInputSentinel)
 const lockedSegments = ref([])
 const segmentStatuses = ref([])
 const activeSegmentIndex = ref(0)
@@ -35,6 +36,9 @@ const shouldFocusFirstError = ref(false)
 const isAnswerShown = ref(false)
 const wrongSubmitCount = ref(0)
 const lastWrongSubmissionKey = ref('')
+const didHandleMobileBeforeInput = ref(false)
+let mobileBeforeInputIgnoreUntil = 0
+let mobileBeforeInputResetTimer = null
 
 const currentWord = computed(() => props.visibleWords[questionIndex.value] ?? null)
 const answerSegments = computed(() => currentWord.value?.word.trim().split(/\s+/).filter(Boolean) ?? [])
@@ -51,10 +55,65 @@ function focusStage() {
   nextTick(() => {
     if (spellingInput.value) {
       spellingInput.value.focus()
+      resetMobileInput()
       return
     }
 
     spellingStage.value?.focus()
+  })
+}
+
+function resetMobileInput(target = spellingInput.value) {
+  mobileInputValue.value = mobileInputSentinel
+
+  nextTick(() => {
+    if (!target) {
+      return
+    }
+
+    target.value = mobileInputSentinel
+    target.setSelectionRange?.(mobileInputSentinel.length, mobileInputSentinel.length)
+  })
+}
+
+function markMobileBeforeInputHandled() {
+  didHandleMobileBeforeInput.value = true
+  mobileBeforeInputIgnoreUntil = Date.now() + 100
+
+  if (mobileBeforeInputResetTimer !== null) {
+    clearTimeout(mobileBeforeInputResetTimer)
+  }
+
+  mobileBeforeInputResetTimer = setTimeout(() => {
+    didHandleMobileBeforeInput.value = false
+    mobileBeforeInputResetTimer = null
+  }, 0)
+}
+
+function consumeMobileBeforeInputHandled() {
+  if (!didHandleMobileBeforeInput.value && Date.now() > mobileBeforeInputIgnoreUntil) {
+    return false
+  }
+
+  didHandleMobileBeforeInput.value = false
+  mobileBeforeInputIgnoreUntil = 0
+
+  if (mobileBeforeInputResetTimer !== null) {
+    clearTimeout(mobileBeforeInputResetTimer)
+    mobileBeforeInputResetTimer = null
+  }
+
+  return true
+}
+
+function applyMobileTextInput(text) {
+  Array.from(text).forEach((character) => {
+    if (character === ' ') {
+      handleSpace()
+      return
+    }
+
+    appendCharacter(character)
   })
 }
 
@@ -78,7 +137,7 @@ function firstEditableIndex(startIndex = 0, direction = 1) {
 
 function resetQuestion() {
   inputs.value = answerSegments.value.map(() => '')
-  mobileInputValue.value = ''
+  resetMobileInput()
   lockedSegments.value = answerSegments.value.map(() => false)
   segmentStatuses.value = answerSegments.value.map(() => 'idle')
   activeSegmentIndex.value = firstEditableIndex(0)
@@ -437,23 +496,69 @@ function handleKeydown(event) {
 function handleSpellingInput(event) {
   const value = event.target.value
 
-  if (!currentWord.value || !value) {
-    mobileInputValue.value = ''
-    event.target.value = ''
+  if (consumeMobileBeforeInputHandled()) {
+    resetMobileInput(event.target)
     return
   }
 
-  Array.from(value).forEach((character) => {
-    if (character === ' ') {
-      handleSpace()
+  if (!currentWord.value) {
+    resetMobileInput(event.target)
+    return
+  }
+
+  if (value.length < mobileInputSentinel.length || !value.startsWith(mobileInputSentinel)) {
+    deleteCharacter()
+    resetMobileInput(event.target)
+    return
+  }
+
+  const typedText = value.slice(mobileInputSentinel.length)
+
+  if (!typedText) {
+    resetMobileInput(event.target)
+    return
+  }
+
+  applyMobileTextInput(typedText)
+  resetMobileInput(event.target)
+}
+
+function handleSpellingBeforeInput(event) {
+  if (!currentWord.value) {
+    return
+  }
+
+  const inputType = event.inputType
+
+  if (inputType?.startsWith('delete')) {
+    event.preventDefault()
+    markMobileBeforeInputHandled()
+    deleteCharacter()
+    resetMobileInput(event.target)
+    return
+  }
+
+  if (inputType?.startsWith('insert') && inputType !== 'insertLineBreak' && event.data !== null) {
+    event.preventDefault()
+    markMobileBeforeInputHandled()
+    applyMobileTextInput(event.data)
+    resetMobileInput(event.target)
+    return
+  }
+
+  if (inputType === 'insertLineBreak') {
+    event.preventDefault()
+    markMobileBeforeInputHandled()
+
+    if (isComplete.value) {
+      goToNextQuestion()
+      resetMobileInput(event.target)
       return
     }
 
-    appendCharacter(character)
-  })
-
-  mobileInputValue.value = ''
-  event.target.value = ''
+    submitAnswer()
+    resetMobileInput(event.target)
+  }
 }
 
 function handleSpellingInputKeydown(event) {
@@ -463,12 +568,6 @@ function handleSpellingInputKeydown(event) {
 
   if (event.ctrlKey || event.metaKey || event.altKey) {
     handleKeydown(event)
-    return
-  }
-
-  if (event.key === 'Backspace') {
-    event.preventDefault()
-    deleteCharacter()
     return
   }
 
@@ -520,6 +619,7 @@ onMounted(() => {
       spellcheck="false"
       enterkeyhint="done"
       aria-label="拼写输入"
+      @beforeinput="handleSpellingBeforeInput"
       @input="handleSpellingInput"
       @keydown.stop="handleSpellingInputKeydown"
     />
@@ -576,15 +676,15 @@ onMounted(() => {
         <span v-else class="spelling-arrow-placeholder" aria-hidden="true"></span>
 
         <div class="spelling-actions">
-          <button class="spelling-action" type="button" @click="playCurrentPronunciation">
-            <kbd>Ctrl</kbd>
-            <kbd>'</kbd>
-            <span>播放发音</span>
-          </button>
           <button class="spelling-action" type="button" @click="showAnswer">
             <kbd>Ctrl</kbd>
             <kbd>;</kbd>
             <span>显示答案</span>
+          </button>
+          <button class="spelling-action" type="button" @click="playCurrentPronunciation">
+            <kbd>Ctrl</kbd>
+            <kbd>'</kbd>
+            <span>播放发音</span>
           </button>
         </div>
 

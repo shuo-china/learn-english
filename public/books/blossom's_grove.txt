@@ -1,3 +1,9 @@
+blossom | 绽放
+bloom | 开花
+chop | 砍
+chopstick | 筷子
+dock | 码头
+soup | 汤
 mission | 使命，任务
 summit | 山顶
 exactly | 确切地
@@ -7,9 +13,9 @@ sparkly | 闪闪发光的
 serious | 认真的；严肃的
 bake | 烘焙
 bakery | 面包店
-! wheat | 小麦
+wheat | 小麦
 berry | 浆果
-oven | 烤箱
+! oven | 烤箱
 ! peel | 削皮
 tone | 音调
 spoon | 勺子
@@ -21,7 +27,7 @@ worst | 最差的(bad的最高级)
 enemy | 敌人
 courage | 勇气
 discourage | 灰心的
-omelet | 鸡蛋饼
+! omelet | 鸡蛋饼
 ! coop | 禽舍
 occupy | 占据
 ! hen | 母鸡
