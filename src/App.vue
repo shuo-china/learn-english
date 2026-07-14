@@ -6,7 +6,7 @@ import { playPronunciation } from './lib/pronunciation'
 import { createShuffledWordIds, loadBooksIndex, loadVocabularyWords } from './lib/vocabulary'
 
 const books = ref([])
-const selectedBookId = ref('')
+const selectedBookFolder = ref('')
 const words = ref([])
 const orderMode = ref('shuffle')
 const shuffledIds = ref([])
@@ -16,10 +16,11 @@ const errorMessage = ref('')
 const route = useRoute()
 
 const selectedBook = computed(() =>
-  books.value.find((book) => book.id === selectedBookId.value),
+  books.value.find((book) => book.folder === selectedBookFolder.value),
 )
 
 const isSpellingMode = computed(() => route.name === 'spell')
+const isReadingMode = computed(() => route.name === 'reading')
 
 const visibleWords = computed(() => {
   if (orderMode.value !== 'shuffle') {
@@ -40,7 +41,7 @@ async function loadBooks() {
 
   try {
     books.value = await loadBooksIndex()
-    selectedBookId.value = books.value[0]?.id ?? ''
+    selectedBookFolder.value = books.value[0]?.folder ?? ''
   } catch (error) {
     errorMessage.value = error.message || '单词本加载失败'
   } finally {
@@ -68,8 +69,8 @@ async function loadSelectedBook() {
   }
 }
 
-function selectBook(bookId) {
-  selectedBookId.value = bookId
+function selectBook(bookFolder) {
+  selectedBookFolder.value = bookFolder
   isBookMenuOpen.value = false
 }
 
@@ -93,18 +94,28 @@ function handleWordClick(wordId) {
   }
 }
 
-watch(selectedBookId, loadSelectedBook)
+watch(selectedBookFolder, loadSelectedBook)
 
 onMounted(loadBooks)
 </script>
 
 <template>
-  <main class="app-shell" :class="{ 'spelling-shell': isSpellingMode }">
+  <main class="app-shell" :class="{ 'spelling-shell': isSpellingMode, 'reading-shell': isReadingMode }">
     <header class="topbar">
       <div class="topbar-inner">
         <nav class="mode-toggle" aria-label="练习模式">
-          <RouterLink class="mode-link" to="/">背诵</RouterLink>
-          <RouterLink class="mode-link" to="/spell">拼写</RouterLink>
+          <RouterLink class="mode-link" to="/">
+            <span class="mode-label-full">背诵</span>
+            <span class="mode-label-short">背</span>
+          </RouterLink>
+          <RouterLink class="mode-link" to="/spell">
+            <span class="mode-label-full">拼写</span>
+            <span class="mode-label-short">写</span>
+          </RouterLink>
+          <RouterLink class="mode-link" to="/reading">
+            <span class="mode-label-full">阅读</span>
+            <span class="mode-label-short">读</span>
+          </RouterLink>
         </nav>
 
         <div class="book-picker">
@@ -117,11 +128,11 @@ onMounted(loadBooks)
           <div v-if="isBookMenuOpen" class="book-menu">
             <button
               v-for="book in books"
-              :key="book.id"
+              :key="book.folder"
               class="book-option"
-              :class="{ active: book.id === selectedBookId }"
+              :class="{ active: book.folder === selectedBookFolder }"
               type="button"
-              @click="selectBook(book.id)"
+              @click="selectBook(book.folder)"
             >
               {{ book.title }}
             </button>
@@ -145,11 +156,11 @@ onMounted(loadBooks)
                 <div class="book-dialog-list">
                   <button
                     v-for="book in books"
-                    :key="book.id"
+                    :key="book.folder"
                     class="book-dialog-option"
-                    :class="{ active: book.id === selectedBookId }"
+                    :class="{ active: book.folder === selectedBookFolder }"
                     type="button"
-                    @click="selectBook(book.id)"
+                    @click="selectBook(book.folder)"
                   >
                     {{ book.title }}
                   </button>
@@ -159,7 +170,7 @@ onMounted(loadBooks)
           </Teleport>
         </div>
 
-        <div class="order-toggle" aria-label="排序方式">
+        <div v-if="!isReadingMode" class="order-toggle" aria-label="排序方式">
           <button
             class="order-button"
             :class="{ active: orderMode === 'sequence' }"
@@ -189,6 +200,7 @@ onMounted(loadBooks)
             :is-loading="isLoading"
             :visible-words="visibleWords"
             :words="words"
+            :selected-book="selectedBook"
             @word-click="handleWordClick"
           />
         </RouterView>

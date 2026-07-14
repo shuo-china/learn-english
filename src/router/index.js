@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import ReadingPage from '../views/ReadingPage.vue'
 import ReviewPage from '../views/ReviewPage.vue'
 import SpellingPage from '../views/SpellingPage.vue'
 
@@ -14,6 +15,11 @@ const router = createRouter({
       path: '/spell',
       name: 'spell',
       component: SpellingPage,
+    },
+    {
+      path: '/reading',
+      name: 'reading',
+      component: ReadingPage,
     },
   ],
 })

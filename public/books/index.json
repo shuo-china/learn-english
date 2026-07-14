@@ -1,12 +1,22 @@
 [
   {
-    "id": "blossom's_grove",
-    "title": "花林物语",
-    "file": "blossom's_grove.txt"
+    "title": "考研词汇",
+    "folder": "postgraduate",
+    "vocabulary_file": "vocabulary.txt",
+    "article_files": [
+      "article-001-a-wise-father.json"
+    ]
   },
   {
-    "id": "postgraduate",
-    "title": "考研词汇",
-    "file": "postgraduate.txt"
+    "title": "花林物语",
+    "folder": "blossoms-grove",
+    "vocabulary_file": "vocabulary.txt",
+    "article_files": []
+  },
+  {
+    "title": "西游记",
+    "folder": "journey-to-the-west",
+    "vocabulary_file": "vocabulary.txt",
+    "article_files": []
   }
 ]

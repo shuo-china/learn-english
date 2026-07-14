@@ -34,7 +34,7 @@ export async function loadBooksIndex(path = '/books/index.json') {
 }
 
 export async function loadVocabularyWords(book) {
-  const response = await fetch(`/books/${book.file}`)
+  const response = await fetch(`/books/${book.folder}/${book.vocabulary_file}`)
 
   if (!response.ok) {
     throw new Error(`无法读取 ${book.title}`)

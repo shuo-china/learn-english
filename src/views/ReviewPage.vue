@@ -1,4 +1,6 @@
 <script setup>
+import { clearReviewSelection } from '../lib/reviewSelection'
+
 defineProps({
   errorMessage: {
     type: String,
@@ -21,12 +23,9 @@ defineProps({
 const emit = defineEmits(['word-click'])
 
 function handleWordClick(wordId) {
-  const selectionText = window.getSelection?.().toString()
+  const selection = window.getSelection?.()
 
-  if (selectionText) {
-    return
-  }
-
+  clearReviewSelection(selection)
   emit('word-click', wordId)
 }
 </script>
@@ -43,17 +42,16 @@ function handleWordClick(wordId) {
         :key="word.id"
         class="word-row"
         :class="{ revealed: word.revealed, key: word.isKey }"
-        role="button"
-        tabindex="0"
-        @click="handleWordClick(word.id)"
-        @keydown.enter.prevent="emit('word-click', word.id)"
-        @keydown.space.prevent="emit('word-click', word.id)"
       >
         <span class="word-text">{{ word.word }}</span>
-        <span class="meaning-cell">
+        <button
+          class="meaning-cell"
+          type="button"
+          @click="handleWordClick(word.id)"
+        >
           <span v-if="word.revealed" class="meaning-text">{{ word.meaning }}</span>
           <span v-else class="meaning-mask" aria-hidden="true"></span>
-        </span>
+        </button>
       </div>
       <div class="word-list-meta" aria-live="polite">共 {{ words.length }} 个单词</div>
     </div>
