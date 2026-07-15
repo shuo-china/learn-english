@@ -227,7 +227,7 @@ watch([() => props.selectedBook?.folder, articleIndex, articleFiles], loadCurren
         </div>
         <div class="relative mt-1">
           <div class="flex items-baseline gap-3">
-            <h2 class="m-0 font-[family-name:var(--reading-english-font)] text-[28px] font-normal tracking-[-0.02em] text-[#214933]">{{ dictionaryCard.word }}</h2>
+            <h2 class="m-0 font-[family-name:var(--reading-english-font)] text-2xl font-normal tracking-[-0.02em] text-[#214933] md:text-[28px]">{{ dictionaryCard.word }}</h2>
             <span v-if="dictionaryCard.phonetic" class="font-[family-name:var(--reading-english-font)] text-sm text-[#667355]">/{{ dictionaryCard.phonetic }}/</span>
           </div>
           <div v-if="dictionaryCard.state === 'loading'" class="mt-2 rounded-[13px_9px_12px_8px] bg-[rgba(190,206,139,0.24)] px-2.5 py-1.5 font-[family-name:var(--chinese-font)] text-xl leading-relaxed text-[#8b9088]">
@@ -235,7 +235,7 @@ watch([() => props.selectedBook?.folder, articleIndex, articleFiles], loadCurren
           </div>
           <div v-else-if="dictionaryCard.state === 'error'" class="mt-2 rounded-[16px_12px_15px_10px] bg-[rgba(209,144,100,0.13)] p-3 font-[family-name:var(--chinese-font)] text-base text-[#8a4c37]">{{ dictionaryCard.message }}</div>
           <template v-else>
-            <ul class="mt-2 grid gap-2 p-0 font-[family-name:var(--chinese-font)] text-xl leading-relaxed text-[#275238]">
+            <ul class="mt-2 grid gap-2 p-0 font-[family-name:var(--chinese-font)] text-base leading-relaxed text-[#275238] md:text-xl">
               <li v-for="meaning in dictionaryCard.meanings" :key="meaning" class="list-none rounded-[13px_9px_12px_8px] bg-[rgba(190,206,139,0.24)] px-2.5 py-1.5">{{ meaning }}</li>
             </ul>
             <p v-if="dictionaryCard.example" class="mt-5 mb-0 border-l-2 border-[#aab868] pl-3 font-[family-name:var(--reading-english-font)] text-base leading-relaxed text-[#4d6148]">{{ dictionaryCard.example }}</p>

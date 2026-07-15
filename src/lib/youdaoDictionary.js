@@ -1,3 +1,5 @@
+import CryptoJS from 'crypto-js'
+
 const YOUDAO_ENDPOINT = 'https://openapi.youdao.com/api'
 
 function getRequiredEnv(name) {
@@ -15,8 +17,7 @@ function truncateForSignature(text) {
 }
 
 async function sha256(text) {
-  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
-  return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('')
+  return CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex)
 }
 
 function createSalt() {
