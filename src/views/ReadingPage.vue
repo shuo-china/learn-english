@@ -15,6 +15,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  words: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const article = ref(null)
@@ -33,6 +37,9 @@ const progressLabel = computed(() =>
 )
 const highlightedWords = computed(() => new Set(
   (article.value?.highlightWords ?? []).map((word) => word.toLowerCase()),
+))
+const vocabularyMeanings = computed(() => new Map(
+  props.words.map(({ word, meaning }) => [word.toLowerCase(), meaning]),
 ))
 
 function isHighlightedWord(word) {
@@ -96,6 +103,24 @@ function placeDictionaryCard(target) {
 
 async function openDictionary(word, event) {
   dictionaryRequestController?.abort()
+  const normalizedWord = word.toLowerCase()
+  const localMeaning = vocabularyMeanings.value.get(normalizedWord)
+
+  if (localMeaning) {
+    dictionaryRequestController = null
+    dictionaryCard.value = {
+      word,
+      state: 'ready',
+      meanings: localMeaning ? [localMeaning] : [],
+      phonetic: '',
+      example: '',
+      exampleTranslation: '',
+      ...placeDictionaryCard(event.currentTarget),
+    }
+    playPronunciation(word)
+    return
+  }
+
   const controller = new AbortController()
   dictionaryRequestController = controller
   dictionaryCard.value = { word, state: 'loading', ...placeDictionaryCard(event.currentTarget) }
@@ -142,7 +167,7 @@ watch([() => props.selectedBook?.folder, articleIndex, articleFiles], loadCurren
 </script>
 
 <template>
-  <article class="relative mx-auto min-h-[calc(100dvh-90px)] w-full max-w-[1100px] overflow-hidden rounded-[14px] border border-[rgba(93,103,45,0.56)] bg-[rgba(255,252,237,0.94)] text-[#183b27] shadow-[0_14px_34px_rgba(43,58,30,0.18)] backdrop-blur-[5px] md:mt-5 md:min-h-[748px]" aria-live="polite">
+  <article class="relative mx-auto min-h-[calc(100dvh-90px)] w-full max-w-[1100px] overflow-hidden rounded-[14px] border border-[rgba(93,103,45,0.56)] bg-[rgba(255,252,237,0.94)] text-[#183b27] shadow-[0_14px_34px_rgba(43,58,30,0.18)] backdrop-blur-[5px] md:min-h-[748px]" aria-live="polite">
     <div v-if="isLoading" class="grid min-h-[calc(100dvh-90px)] place-items-center p-[30px] text-center text-xl font-bold text-[#3e6749] md:min-h-[748px]">正在翻开文章...</div>
     <div v-else-if="errorMessage" class="grid min-h-[calc(100dvh-90px)] place-items-center p-[30px] text-center text-xl font-bold text-[#9f492f] md:min-h-[748px]">{{ errorMessage }}</div>
     <div v-else-if="!articleCount" class="grid min-h-[calc(100dvh-90px)] place-items-center p-[30px] text-center text-xl font-bold text-[#3e6749] md:min-h-[748px]">该单词书暂无配套文章</div>
@@ -225,8 +250,8 @@ watch([() => props.selectedBook?.folder, articleIndex, articleFiles], loadCurren
           <Leaf :size="17" aria-hidden="true" />
           <span class="font-[family-name:var(--chinese-font)] text-[13px] tracking-[0.12em]">森林词典</span>
         </div>
-        <div class="relative mt-1">
-          <div class="flex items-baseline gap-3">
+        <div class="relative mt-1 text-center">
+          <div class="flex items-baseline justify-center gap-3">
             <h2 class="m-0 font-[family-name:var(--reading-english-font)] text-2xl font-normal tracking-[-0.02em] text-[#214933] md:text-[28px]">{{ dictionaryCard.word }}</h2>
             <span v-if="dictionaryCard.phonetic" class="font-[family-name:var(--reading-english-font)] text-sm text-[#667355]">/{{ dictionaryCard.phonetic }}/</span>
           </div>
@@ -238,8 +263,8 @@ watch([() => props.selectedBook?.folder, articleIndex, articleFiles], loadCurren
             <ul class="mt-2 grid gap-2 p-0 font-[family-name:var(--chinese-font)] text-base leading-relaxed text-[#275238] md:text-xl">
               <li v-for="meaning in dictionaryCard.meanings" :key="meaning" class="list-none rounded-[13px_9px_12px_8px] bg-[rgba(190,206,139,0.24)] px-2.5 py-1.5">{{ meaning }}</li>
             </ul>
-            <p v-if="dictionaryCard.example" class="mt-5 mb-0 border-l-2 border-[#aab868] pl-3 font-[family-name:var(--reading-english-font)] text-base leading-relaxed text-[#4d6148]">{{ dictionaryCard.example }}</p>
-            <p v-if="dictionaryCard.exampleTranslation" class="mt-1 mb-0 pl-3 font-[family-name:var(--chinese-font)] text-sm text-[#718064]">{{ dictionaryCard.exampleTranslation }}</p>
+            <p v-if="dictionaryCard.example" class="mt-5 mb-0 font-[family-name:var(--reading-english-font)] text-base leading-relaxed text-[#4d6148]">{{ dictionaryCard.example }}</p>
+            <p v-if="dictionaryCard.exampleTranslation" class="mt-1 mb-0 font-[family-name:var(--chinese-font)] text-sm text-[#718064]">{{ dictionaryCard.exampleTranslation }}</p>
             <p v-if="!dictionaryCard.meanings.length" class="mt-6 font-[family-name:var(--chinese-font)] text-base text-[#657257]">暂未找到简明释义。</p>
           </template>
         </div>

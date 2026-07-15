@@ -4,8 +4,16 @@
     "folder": "postgraduate",
     "vocabulary_file": "vocabulary.txt",
     "article_files": [
-      "the-library-after-rain.json",
-      "the-map-inside-the-wall.json"
+      "article-001-the-warning.json",
+      "article-002-into-the-mountains.json",
+      "article-003-the-first-wall.json",
+      "article-004-the-night-the-power-failed.json",
+      "article-005-the-empty-town-run.json",
+      "article-006-the-cost-of-a-higher-wall.json",
+      "article-007-the-trade-below-the-ridge.json",
+      "article-008-a-stranger-at-the-gate.json",
+      "article-009-the-horde-arrives.json",
+      "article-010-leaving-the-mountain-house.json"
     ]
   },
   {

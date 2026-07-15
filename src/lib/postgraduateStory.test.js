@@ -7,10 +7,10 @@ import { validateArticle } from './articles.js'
 const root = path.resolve(import.meta.dirname, '..', '..')
 const bookDir = path.join(root, 'public', 'books', 'postgraduate')
 
-test('postgraduate book has two valid bilingual articles', async () => {
+test('postgraduate book has ten valid bilingual articles', async () => {
   const books = JSON.parse(await readFile(path.join(root, 'public', 'books', 'index.json'), 'utf8'))
   const book = books.find(({ folder }) => folder === 'postgraduate')
-  assert.equal(book.article_files.length, 2)
+  assert.equal(book.article_files.length, 10)
   assert.deepEqual(
     book.article_files,
     book.article_files.slice().sort(),

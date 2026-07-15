@@ -8,7 +8,7 @@ import { createShuffledWordIds, loadBooksIndex, loadVocabularyWords } from './li
 const books = ref([])
 const selectedBookFolder = ref('')
 const words = ref([])
-const orderMode = ref('shuffle')
+const orderMode = ref('sequence')
 const shuffledIds = ref([])
 const shuffledArticleFiles = ref([])
 const isBookMenuOpen = ref(false)
@@ -234,7 +234,7 @@ onMounted(loadBooks)
         class="mx-auto w-[min(calc(100%-28px),1090px)] py-6 md:w-[min(calc(100%-56px),1000px)] md:py-[38px]"
         :class="{
           'h-full !py-4 md:h-auto md:!py-[38px]': isSpellingMode,
-          '!w-[calc(100%-16px)] !py-3 md:!w-[min(calc(100%-64px),1040px)] md:!py-12 md:!pb-16': isReadingMode,
+          '!w-[calc(100%-16px)] !py-6 md:!w-[min(calc(100%-64px),1040px)] md:!py-[38px] md:!pb-16': isReadingMode,
         }"
       >
         <RouterView v-slot="{ Component }">
