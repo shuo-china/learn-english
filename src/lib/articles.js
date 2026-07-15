@@ -1,3 +1,5 @@
+import { fetchJson } from './fetchResource.js'
+
 function articleFormatError(fileName, detail) {
   return new Error(`${fileName} 格式错误：${detail}`)
 }
@@ -11,6 +13,10 @@ export function validateArticle(article, fileName = '文章文件') {
     throw articleFormatError(fileName, '缺少文章标题')
   }
 
+  if (!Array.isArray(article.highlightWords) || article.highlightWords.some((word) => typeof word !== 'string' || !word.trim())) {
+    throw articleFormatError(fileName, 'highlightWords must be an array of non-empty strings')
+  }
+
   if (!Array.isArray(article.paragraphs) || !article.paragraphs.length) {
     throw articleFormatError(fileName, 'paragraphs 必须包含至少一个段落')
   }
@@ -22,34 +28,12 @@ export function validateArticle(article, fileName = '文章文件') {
       throw articleFormatError(fileName, `${location}必须是对象`)
     }
 
-    if (!Array.isArray(paragraph.content) || !paragraph.content.length) {
-      throw articleFormatError(fileName, `${location}的 content 必须包含正文`)
+    if (typeof paragraph.english !== 'string' || !paragraph.english.trim()) {
+      throw articleFormatError(fileName, `${location}缺少 english`)
     }
 
-    paragraph.content.forEach((part, partIndex) => {
-      if (typeof part === 'string') {
-        return
-      }
-
-      const isTerm =
-        part &&
-        typeof part === 'object' &&
-        !Array.isArray(part) &&
-        typeof part.text === 'string' &&
-        part.text.trim() &&
-        typeof part.meaning === 'string' &&
-        part.meaning.trim()
-
-      if (!isTerm) {
-        throw articleFormatError(
-          fileName,
-          `${location}第 ${partIndex + 1} 个 content 项必须是字符串或包含 text、meaning 的对象`,
-        )
-      }
-    })
-
-    if (typeof paragraph.translation !== 'string' || !paragraph.translation.trim()) {
-      throw articleFormatError(fileName, `${location}缺少 translation`)
+    if (typeof paragraph.chinese !== 'string' || !paragraph.chinese.trim()) {
+      throw articleFormatError(fileName, `${location}缺少 chinese`)
     }
   })
 
@@ -64,26 +48,17 @@ export function createBookAssetPath(book, fileName) {
   return `/books/${book.folder}/${fileName}`
 }
 
-export async function loadBookArticle(book, articleIndex = 0) {
-  const fileName = book?.article_files?.[articleIndex]
+export async function loadBookArticle(book, articleIndex = 0, articleFiles = book?.article_files) {
+  const fileName = articleFiles?.[articleIndex]
 
   if (!fileName) {
     return null
   }
 
-  const response = await fetch(createBookAssetPath(book, fileName))
-
-  if (!response.ok) {
-    throw new Error(`无法读取文章 ${fileName}`)
-  }
-
-  let article
-
-  try {
-    article = await response.json()
-  } catch {
-    throw articleFormatError(fileName, '不是有效的 JSON')
-  }
+  const article = await fetchJson(createBookAssetPath(book, fileName), {
+    errorMessage: `无法读取文章 ${fileName}`,
+    invalidJsonMessage: articleFormatError(fileName, '不是有效的 JSON').message,
+  })
 
   return validateArticle(article, fileName)
 }

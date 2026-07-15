@@ -1,3 +1,5 @@
+import { fetchJson, fetchText } from './fetchResource.js'
+
 export function parseVocabularyText(text) {
   return text
     .split(/\r?\n/)
@@ -24,23 +26,13 @@ export function parseVocabularyText(text) {
 }
 
 export async function loadBooksIndex(path = '/books/index.json') {
-  const response = await fetch(path)
-
-  if (!response.ok) {
-    throw new Error('无法读取单词本清单')
-  }
-
-  return response.json()
+  return fetchJson(path, { errorMessage: '无法读取单词本清单' })
 }
 
 export async function loadVocabularyWords(book) {
-  const response = await fetch(`/books/${book.folder}/${book.vocabulary_file}`)
-
-  if (!response.ok) {
-    throw new Error(`无法读取 ${book.title}`)
-  }
-
-  return parseVocabularyText(await response.text())
+  const path = `/books/${book.folder}/${book.vocabulary_file}`
+  const text = await fetchText(path, { errorMessage: `无法读取 ${book.title}` })
+  return parseVocabularyText(text)
 }
 
 export function createShuffledWordIds(items) {

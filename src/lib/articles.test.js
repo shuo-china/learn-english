@@ -4,10 +4,11 @@ import { createBookAssetPath, loadBookArticle, validateArticle } from './article
 
 const validArticle = {
   title: 'A Wise Father?',
+  highlightWords: ['wise'],
   paragraphs: [
     {
-      content: ['It is a ', { text: 'wise', meaning: '明智的' }, ' father.'],
-      translation: '这是一位明智的父亲。',
+      english: 'It is a wise father.',
+      chinese: '这是一位明智的父亲。',
     },
   ],
 }
@@ -21,21 +22,29 @@ test('builds vocabulary and article paths from the shared book folder', () => {
   )
 })
 
-test('accepts paragraphs without ids and annotated terms without parts of speech', () => {
+test('accepts bilingual paragraph pairs', () => {
   assert.equal(validateArticle(validArticle, 'article.json'), validArticle)
 })
 
-test('reports the article filename and paragraph number for invalid content', () => {
+test('reports the article filename and paragraph number for invalid paragraphs', () => {
   assert.throws(
     () =>
       validateArticle(
         {
           title: 'Broken article',
-          paragraphs: [{ content: [{ text: 'wise' }], translation: '译文' }],
+          highlightWords: [],
+          paragraphs: [{ english: '', chinese: '译文' }],
         },
         'broken.json',
       ),
-    /broken\.json 格式错误：第 1 段第 1 个 content 项/,
+    /broken\.json.*english/,
+  )
+})
+
+test('requires highlightWords to be an array of words', () => {
+  assert.throws(
+    () => validateArticle({ ...validArticle, highlightWords: ['wise', ''] }, 'broken.json'),
+    /broken\.json.*highlightWords/,
   )
 })
 

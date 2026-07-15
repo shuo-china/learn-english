@@ -1,4 +1,4 @@
-export function clearReviewSelection(selection) {
+export function clearReciteSelection(selection) {
   try {
     if (!selection?.toString()) {
       return

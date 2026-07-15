@@ -1,15 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ReadingPage from '../views/ReadingPage.vue'
-import ReviewPage from '../views/ReviewPage.vue'
+import RecitePage from '../views/RecitePage.vue'
 import SpellingPage from '../views/SpellingPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/recite',
+      name: 'recite',
+      component: RecitePage,
+    },
+    {
       path: '/',
-      name: 'review',
-      component: ReviewPage,
+      redirect: { name: 'recite' },
     },
     {
       path: '/spell',

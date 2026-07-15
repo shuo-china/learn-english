@@ -237,7 +237,7 @@ function getWordWidth(word) {
   }
 
   return word
-    .toLocaleLowerCase()
+    .toLowerCase()
     .split('')
     .reduce((totalWidth, letter) => totalWidth + (letterWidths[letter] || 1), 1)
 }
@@ -247,11 +247,23 @@ function inputWidth(segment, index) {
 }
 
 function normalizeAnswerText(text) {
-  return text.trim().toLocaleLowerCase()
+  return text.trim().toLowerCase()
 }
 
 function isSegmentCorrect(input, segment) {
   return normalizeAnswerText(input) === normalizeAnswerText(segment)
+}
+
+function isCharacterCorrect(input, segment, characterIndex) {
+  return input?.toLowerCase() === segment[characterIndex]?.toLowerCase()
+}
+
+function displayedCharacters(segment, index) {
+  const answerCharacters = Array.from(segment)
+  const inputCharacters = Array.from(inputs.value[index] ?? '')
+  const characterCount = Math.max(answerCharacters.length, inputCharacters.length)
+
+  return Array.from({ length: characterCount }, (_, characterIndex) => answerCharacters[characterIndex] ?? '')
 }
 
 function isLastEditableSegment(index = activeSegmentIndex.value) {
@@ -377,7 +389,7 @@ function showAnswer() {
 }
 
 function hideAnswer(event) {
-  if (event?.target?.closest?.('.answer-popover, .spelling-action')) {
+  if (event?.target?.closest?.('.spelling-action')) {
     return
   }
 
@@ -602,7 +614,7 @@ onMounted(() => {
 <template>
   <section
     ref="spellingStage"
-    class="spelling-paper"
+    class="relative grid h-full min-h-0 overflow-hidden p-3 outline-none md:h-auto md:min-h-[550px] md:p-11"
     tabindex="0"
     aria-label="单词拼写练习"
     @click="hideAnswer"
@@ -611,7 +623,7 @@ onMounted(() => {
     <input
       ref="spellingInput"
       :value="mobileInputValue"
-      class="spelling-input"
+      class="absolute bottom-24 left-1/2 z-0 size-px border-0 bg-transparent p-0 text-transparent opacity-[0.01] outline-none caret-transparent"
       type="text"
       inputmode="text"
       autocomplete="off"
@@ -624,48 +636,69 @@ onMounted(() => {
       @keydown.stop="handleSpellingInputKeydown"
     />
 
-    <div v-if="isLoading" class="empty-state">正在翻开单词本...</div>
-    <div v-else-if="errorMessage" class="empty-state">{{ errorMessage }}</div>
-    <div v-else-if="!visibleWords.length" class="empty-state">这个单词本还没有可拼写的内容</div>
+    <div v-if="isLoading" class="relative z-[1] grid min-h-[470px] place-items-center text-lg font-bold text-[#4c7047]">正在翻开单词本...</div>
+    <div v-else-if="errorMessage" class="relative z-[1] grid min-h-[470px] place-items-center text-lg font-bold text-[#4c7047]">{{ errorMessage }}</div>
+    <div v-else-if="!visibleWords.length" class="relative z-[1] grid min-h-[470px] place-items-center text-lg font-bold text-[#4c7047]">这个单词本还没有可拼写的内容</div>
 
-    <div v-else class="spelling-card">
-      <div class="spelling-progress" aria-label="拼写进度">{{ progressLabel }}</div>
-      <div v-if="isAnswerShown" class="answer-popover" role="dialog" aria-label="答案">
-        <div class="answer-word">{{ currentWord.word }}</div>
+    <div v-else class="relative m-auto grid h-full min-h-0 w-full max-w-[720px] content-center justify-items-center overflow-hidden rounded-xl border-[1.5px] border-[rgba(83,112,67,0.48)] px-3 pt-[46px] pb-[100px] text-[#203725] [background:linear-gradient(180deg,rgba(255,253,235,0.92),rgba(250,239,197,0.84)),radial-gradient(ellipse_at_20%_8%,rgba(255,255,255,0.75),transparent_36%)] shadow-[0_22px_45px_rgba(57,77,46,0.18),inset_0_2px_0_rgba(255,255,255,0.58),inset_0_-8px_20px_rgba(161,132,62,0.08)] after:absolute after:right-[22px] after:bottom-[76px] after:h-[46px] after:w-[72px] after:bg-[radial-gradient(ellipse_at_24%_54%,rgba(210,155,54,0.42)_0_18%,transparent_19%),radial-gradient(ellipse_at_54%_48%,rgba(96,139,78,0.42)_0_22%,transparent_23%),radial-gradient(ellipse_at_80%_60%,rgba(77,122,76,0.35)_0_15%,transparent_16%)] after:opacity-55 after:content-[''] md:h-auto md:min-h-[520px] md:max-w-[960px] md:px-[42px] md:pt-[92px] md:pb-[108px]">
+      <div class="absolute top-[18px] right-[18px] z-[1] select-none font-[family-name:var(--english-font)] text-sm leading-none font-bold tracking-normal text-[#6f5b25] md:top-6 md:right-7 md:text-base" aria-label="拼写进度">{{ progressLabel }}</div>
+      <div v-if="isComplete" class="relative z-[1] grid max-w-[min(760px,100%)] justify-items-center gap-[22px] text-center md:gap-[26px]" aria-live="polite">
+        <div class="[overflow-wrap:anywhere] font-[family-name:var(--english-font)] text-5xl leading-[1.08] font-bold tracking-normal text-[#275238] md:text-6xl md:leading-[1.04]">{{ currentWord.word }}</div>
+        <div class="[overflow-wrap:anywhere] font-[family-name:var(--chinese-font)] text-2xl leading-[1.25] font-bold tracking-normal text-[#8b5a18] md:text-[40px] md:leading-[1.2]">{{ currentWord.meaning }}</div>
       </div>
 
-      <div v-if="isComplete" class="spelling-success" aria-live="polite">
-        <div class="spelling-success-word">{{ currentWord.word }}</div>
-        <div class="spelling-success-meaning">{{ currentWord.meaning }}</div>
-      </div>
+      <p v-else class="relative z-[1] mb-[34px] max-w-[min(760px,100%)] font-[family-name:var(--chinese-font)] text-3xl leading-[1.25] font-bold text-[#233f2b] text-center md:mb-11 md:text-[40px]">{{ currentWord.meaning }}</p>
 
-      <p v-else class="spelling-prompt">{{ currentWord.meaning }}</p>
-
-      <div v-if="!isComplete" class="spelling-segments" aria-live="polite">
+      <div v-if="!isComplete" class="relative z-[1] flex w-full flex-wrap justify-center gap-x-2 gap-y-3.5 md:gap-x-[9px] md:gap-y-4" aria-live="polite">
         <span
           v-for="(segment, index) in answerSegments"
           :key="`${currentWord.id}-${index}`"
-          class="spell-segment"
+          class="grid min-h-[58px] shrink-0 grow-0 basis-auto items-end border-b-[3px] border-[rgba(110,132,86,0.42)] px-1.5 pb-[9px] text-center font-[family-name:var(--english-font)] text-4xl leading-none font-medium text-[#5e6e60] md:min-h-[66px] md:px-2.5 md:text-5xl"
           :style="{ minWidth: `${inputWidth(segment, index)}ch` }"
-          :class="{
-            active: index === activeSegmentIndex && !lockedSegments[index],
-            error: segmentStatuses[index] === 'error',
-            answer: segmentStatuses[index] === 'answer',
-            retryComplete:
-              index !== activeSegmentIndex && segmentStatuses[index] === 'retry-complete',
-            locked: lockedSegments[index],
-          }"
+          :class="[
+            index === activeSegmentIndex &&
+            !lockedSegments[index] &&
+            segmentStatuses[index] !== 'error'
+              ? '!border-[#d9962c] !text-[#d08921]'
+              : '',
+            segmentStatuses[index] === 'error' ? '!border-[#c65a45] !text-[#b94d39]' : '',
+            segmentStatuses[index] === 'answer'
+              ? '!border-[rgba(110,132,86,0.42)] !text-[#5e6e60]'
+              : '',
+            isAnswerShown && !lockedSegments[index]
+              ? '!border-[#d5a24a]'
+              : '',
+            index !== activeSegmentIndex && segmentStatuses[index] === 'retry-complete'
+              ? '!border-[#5d9c83] !text-[#4f8873]'
+              : '',
+            lockedSegments[index]
+              ? '!border-[rgba(104,137,79,0.38)] !text-[#6f8a52]'
+              : '',
+          ]"
         >
-          <span class="spell-text">
+          <span v-if="isAnswerShown && !lockedSegments[index]" class="flex min-w-[1ch] justify-center [overflow-wrap:normal] whitespace-nowrap" :aria-label="`答案提示：${segment}`">
+            <span
+              v-for="(character, characterIndex) in displayedCharacters(segment, index)"
+              :key="`${currentWord.id}-${index}-${characterIndex}`"
+              :class="[
+                !inputs[index]?.[characterIndex]
+                  ? 'text-[#a8afa1]'
+                  : isCharacterCorrect(inputs[index][characterIndex], segment, characterIndex)
+                    ? '!text-[#d08921]'
+                    : '!text-[#b94d39]',
+              ]"
+            >{{ inputs[index]?.[characterIndex] || character }}</span>
+          </span>
+          <span v-else class="block min-w-[1ch] [overflow-wrap:normal] whitespace-nowrap">
             {{ inputs[index] || (index === activeSegmentIndex ? '' : '\u00a0') }}
           </span>
         </span>
       </div>
 
-      <div class="spelling-controls" aria-label="拼写练习控制">
+      <div class="absolute right-0 bottom-3 left-0 z-[2] grid min-h-[58px] grid-cols-[42px_minmax(0,1fr)_42px] items-center px-1.5 font-[family-name:var(--english-font)] text-[#315038] md:bottom-[18px] md:grid-cols-[56px_minmax(0,1fr)_56px] md:px-[18px]" aria-label="拼写练习控制">
         <button
           v-if="questionIndex > 0"
-          class="spelling-arrow"
+          class="grid size-[34px] cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0 text-[rgba(58,87,55,0.58)] transition-[color,background-color,border-color,box-shadow] duration-140 hover:bg-[rgba(255,248,213,0.62)] hover:text-[#284d32]"
           type="button"
           aria-label="上一个，快捷键 Ctrl 加逗号"
           title="Ctrl + ,"
@@ -673,24 +706,24 @@ onMounted(() => {
         >
           <ChevronLeft :size="22" :stroke-width="1.8" />
         </button>
-        <span v-else class="spelling-arrow-placeholder" aria-hidden="true"></span>
+        <span v-else class="grid size-[34px] place-items-center rounded-full border-0 bg-transparent p-0 text-[rgba(58,87,55,0.58)]" aria-hidden="true"></span>
 
-        <div class="spelling-actions">
-          <button class="spelling-action" type="button" @click="showAnswer">
-            <kbd>Ctrl</kbd>
-            <kbd>;</kbd>
-            <span>显示答案</span>
+        <div class="flex flex-wrap items-center justify-center gap-2.5 md:gap-x-[34px] md:gap-y-[18px]">
+          <button class="spelling-action inline-flex min-h-[34px] min-w-[74px] cursor-pointer items-center justify-center gap-0 rounded-[8px_7px_9px_7px] border border-transparent bg-transparent px-2.5 py-1.5 text-sm leading-none font-medium text-[#3f5c43] shadow-none transition-[color,background-color,border-color,box-shadow] duration-140 hover:bg-[rgba(255,248,213,0.62)] hover:text-[#284d32] md:min-w-0 md:gap-1" type="button" :aria-pressed="isAnswerShown" @click="showAnswer">
+            <kbd class="hidden h-[22px] min-w-[27px] rounded-[6px_5px_7px_5px] border border-[rgba(108,130,85,0.36)] bg-[rgba(255,253,235,0.86)] px-[7px] py-0.5 text-center font-[family-name:var(--english-font)] text-xs leading-4 font-semibold text-[#4a5939] shadow-[inset_0_-1px_0_rgba(139,118,62,0.12),0_1px_1px_rgba(45,63,39,0.05)] md:block">Ctrl</kbd>
+            <kbd class="hidden h-[22px] min-w-[27px] rounded-[6px_5px_7px_5px] border border-[rgba(108,130,85,0.36)] bg-[rgba(255,253,235,0.86)] px-[7px] py-0.5 text-center font-[family-name:var(--english-font)] text-xs leading-4 font-semibold text-[#4a5939] shadow-[inset_0_-1px_0_rgba(139,118,62,0.12),0_1px_1px_rgba(45,63,39,0.05)] md:block">;</kbd>
+            <span class="relative top-px inline-flex h-[22px] items-center leading-none">{{ isAnswerShown ? '隐藏答案' : '显示答案' }}</span>
           </button>
-          <button class="spelling-action" type="button" @click="playCurrentPronunciation">
-            <kbd>Ctrl</kbd>
-            <kbd>'</kbd>
-            <span>播放发音</span>
+          <button class="inline-flex min-h-[34px] min-w-[74px] cursor-pointer items-center justify-center gap-0 rounded-[8px_7px_9px_7px] border border-transparent bg-transparent px-2.5 py-1.5 text-sm leading-none font-medium text-[#3f5c43] shadow-none transition-[color,background-color,border-color,box-shadow] duration-140 hover:bg-[rgba(255,248,213,0.62)] hover:text-[#284d32] md:min-w-0 md:gap-1" type="button" @click="playCurrentPronunciation">
+            <kbd class="hidden h-[22px] min-w-[27px] rounded-[6px_5px_7px_5px] border border-[rgba(108,130,85,0.36)] bg-[rgba(255,253,235,0.86)] px-[7px] py-0.5 text-center font-[family-name:var(--english-font)] text-xs leading-4 font-semibold text-[#4a5939] shadow-[inset_0_-1px_0_rgba(139,118,62,0.12),0_1px_1px_rgba(45,63,39,0.05)] md:block">Ctrl</kbd>
+            <kbd class="hidden h-[22px] min-w-[27px] rounded-[6px_5px_7px_5px] border border-[rgba(108,130,85,0.36)] bg-[rgba(255,253,235,0.86)] px-[7px] py-0.5 text-center font-[family-name:var(--english-font)] text-xs leading-4 font-semibold text-[#4a5939] shadow-[inset_0_-1px_0_rgba(139,118,62,0.12),0_1px_1px_rgba(45,63,39,0.05)] md:block">'</kbd>
+            <span class="relative top-px inline-flex h-[22px] items-center leading-none">播放发音</span>
           </button>
         </div>
 
         <button
           v-if="questionIndex < visibleWords.length - 1"
-          class="spelling-arrow"
+          class="grid size-[34px] cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0 text-[rgba(58,87,55,0.58)] transition-[color,background-color,border-color,box-shadow] duration-140 hover:bg-[rgba(255,248,213,0.62)] hover:text-[#284d32]"
           type="button"
           aria-label="下一个，快捷键 Ctrl 加句号"
           title="Ctrl + ."
@@ -698,7 +731,7 @@ onMounted(() => {
         >
           <ChevronRight :size="22" :stroke-width="1.8" />
         </button>
-        <span v-else class="spelling-arrow-placeholder" aria-hidden="true"></span>
+        <span v-else class="grid size-[34px] place-items-center rounded-full border-0 bg-transparent p-0 text-[rgba(58,87,55,0.58)]" aria-hidden="true"></span>
       </div>
     </div>
   </section>

@@ -2,20 +2,20 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { clearReviewSelection } from './reviewSelection.js'
+import { clearReciteSelection } from './reciteSelection.js'
 
 test('allows selecting English words but not Chinese meanings', () => {
-  const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8')
+  const component = readFileSync(new URL('../views/RecitePage.vue', import.meta.url), 'utf8')
 
-  assert.match(css, /\.word-text\s*{[^}]*user-select:\s*text;/s)
-  assert.match(css, /\.meaning-cell\s*{[^}]*user-select:\s*none;/s)
+  assert.match(component, /<span[\s\S]*class="[^"]*select-text[^"]*"/)
+  assert.match(component, /<button[\s\S]*class="[^"]*select-none[^"]*"/)
 })
 
 test('binds reveal toggling to a native Chinese meaning button instead of the whole row', () => {
-  const component = readFileSync(new URL('../views/ReviewPage.vue', import.meta.url), 'utf8')
+  const component = readFileSync(new URL('../views/RecitePage.vue', import.meta.url), 'utf8')
   const rowTag = component.match(/<div\s+v-for="word in visibleWords"[\s\S]*?>/)?.[0] ?? ''
-  const wordTextTag = component.match(/<span class="word-text"[\s\S]*?>/)?.[0] ?? ''
-  const meaningCellTag = component.match(/<button\s+class="meaning-cell"[\s\S]*?>/)?.[0] ?? ''
+  const wordTextTag = component.match(/<span\s+[\s\S]*?select-text[\s\S]*?>/)?.[0] ?? ''
+  const meaningCellTag = component.match(/<button\s+[\s\S]*?select-none[\s\S]*?>/)?.[0] ?? ''
 
   assert.doesNotMatch(rowTag, /@click=/)
   assert.doesNotMatch(wordTextTag, /@click=/)
@@ -33,7 +33,7 @@ test('clears selected text after a meaning-cell click', () => {
     },
   }
 
-  clearReviewSelection(selection)
+  clearReciteSelection(selection)
 
   assert.equal(removeCount, 1)
 })
@@ -47,13 +47,13 @@ test('does not clear when there is no selected text', () => {
     },
   }
 
-  clearReviewSelection(selection)
+  clearReciteSelection(selection)
 
   assert.equal(removeCount, 0)
 })
 
 test('ignores missing or partial Selection APIs', () => {
-  assert.doesNotThrow(() => clearReviewSelection())
-  assert.doesNotThrow(() => clearReviewSelection({ toString: () => 'recite' }))
-  assert.doesNotThrow(() => clearReviewSelection({ toString: () => { throw new Error('selection detached') } }))
+  assert.doesNotThrow(() => clearReciteSelection())
+  assert.doesNotThrow(() => clearReciteSelection({ toString: () => 'recite' }))
+  assert.doesNotThrow(() => clearReciteSelection({ toString: () => { throw new Error('selection detached') } }))
 })
